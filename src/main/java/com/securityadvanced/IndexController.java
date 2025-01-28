@@ -11,55 +11,37 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class IndexController {
-
-    private final SecurityContextService securityContextService;
-
-    public IndexController(SecurityContextService securityContextService) {
-        this.securityContextService = securityContextService;
-    }
-
     @GetMapping("/")
-    public String index(){
-        SecurityContext securityContext = SecurityContextHolder.getContextHolderStrategy().getContext();
-        Authentication authentication = securityContext.getAuthentication();
-        System.out.println("authentication = " + authentication);
-
-        securityContextService.securityContext();
-
-        return  "index";
-    }
-
-    @GetMapping("/home")
-    public String home() {
-        return "home";
+    public Authentication index(Authentication authentication){
+        return authentication;
     }
 
     @GetMapping("/loginPage")
-    public String loginPage() {
+    public String login(){
         return "loginPage";
     }
 
     @GetMapping("/anonymous")
-    public String anonymous() {
+    public String anonymous(){
         return "anonymous";
     }
 
     @GetMapping("/authentication")
-    public String authentication(Authentication authentication) {
-        if(authentication instanceof AnonymousAuthenticationToken){
+    public String authentication(Authentication authentication){
+
+        if (authentication instanceof AnonymousAuthenticationToken) {
             return "anonymous";
-        }else {
-            return "not anonymous";
+        } else {
+            return "null";
         }
     }
-
     @GetMapping("/anonymousContext")
-    public String anonymousContext(@CurrentSecurityContext SecurityContext context) {
+    public String anonymousContext(@CurrentSecurityContext SecurityContext context){
         return context.getAuthentication().getName();
     }
 
     @GetMapping("/logoutSuccess")
-    public String logoutSuccess() {
+    public String logoutSuccess(@CurrentSecurityContext SecurityContext context){
         return "logoutSuccess";
     }
 }
