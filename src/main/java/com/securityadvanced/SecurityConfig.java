@@ -39,22 +39,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        AuthenticationManager authenticationManager = builder.build();
         http
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())
-        ;
+                .securityContext(securityContext -> securityContext.requireExplicitSave(false))
+                .authenticationManager(authenticationManager)
+                .addFilterBefore(customAuthenticationFilter(http, authenticationManager), UsernamePasswordAuthenticationFilter.class);
+
+
         return http.build();
     }
 
-    @Bean
-    public UserDetailsService customUserDetailsService(){
-        return new CustomUserDetailsService();
+
+    public CustomAuthenticationFilter customAuthenticationFilter(HttpSecurity http, AuthenticationManager authenticationManager){
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(http);
+        customAuthenticationFilter.setAuthenticationManager(authenticationManager);
+        return customAuthenticationFilter;
     }
 
-    /*@Bean
-    public UserDetailsService userDetailsService(){
-        UserDetails user = User.withUsername("user").password("{noop}1111").roles("USER").build();
-        return  new InMemoryUserDetailsManager(user);
-    }*/
+    @Bean
+    public UserDetailsService userDetailsService() {
+        UserDetails user = User.withUsername("user").password("password").roles("USER").build();
+        return new InMemoryUserDetailsManager(user);
+    }
+
+
 }
